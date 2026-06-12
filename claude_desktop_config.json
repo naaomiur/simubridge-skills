@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "simubridge": {
+      "command": "python",
+      "args": ["-m", "simubridge"],
+      "description": "SimuBridge MCP — AI-driven Simulink model creation, inspection, modification, and simulation via MATLAB Engine. 20+ tools for natural-language-driven Simulink operations."
+    }
+  }
+}
