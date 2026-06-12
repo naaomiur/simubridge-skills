@@ -19,7 +19,7 @@
 
 `simubridge-skills` is a **Claude Code / Codex skill project** that lets AI assistants control MATLAB Simulink using natural language. It contains:
 
-- 🎯 **Skill pack** (`skills/simubridge/`) — prompt bundle that teaches AI how to use Simulink tools effectively
+- 🎯 **Skill pack** (`skill/simubridge/`) — prompt bundle that teaches AI how to use Simulink tools effectively
 - 🔧 **MCP server** (`src/simubridge/`) — local backend connecting to MATLAB Engine with 20+ tools
 
 **The skill is the product. The MCP server is the backend.**
@@ -30,7 +30,7 @@
 
 | Skill | Status | Purpose | Trigger Keywords |
 |-------|--------|---------|-----------------|
-| [`simubridge`](skills/simubridge/README.md) | Stable | Simulink model creation, inspection, modification, and simulation | "Simulink", "open model", "add block", "connect", "simulate", "subsystem" |
+| [`simubridge`](skill/simubridge/README.md) | Stable | Simulink model creation, inspection, modification, and simulation | "Simulink", "open model", "add block", "connect", "simulate", "subsystem" |
 
 ---
 
@@ -77,33 +77,45 @@ matlab.engine.shareEngine('SIMULINK_MCP_SESSION')
 
 The skill teaches Claude how to use Simulink tools effectively. Copy the entire folder (not just `SKILL.md`) — the `references/` directory is needed by the skill.
 
-> ⚠️ Only copying `SKILL.md` will silently break the skill. Always copy the whole `skills/simubridge/` folder.
+> ⚠️ Only copying `SKILL.md` will silently break the skill. Always copy the whole `skill/simubridge/` folder.
 
-#### Claude Code
+#### Claude Code (with MCP — full functionality)
 
 ```bash
-# Create the skills directory if it doesn't exist
 mkdir -p ~/.claude/skills
-
-# Copy the skill folder (do NOT copy only SKILL.md)
-cp -R skills/simubridge ~/.claude/skills/
+cp -R skill/simubridge ~/.claude/skills/
 ```
 
-After copying, the skill is available at the **project level**. Start a new Claude Code session and ask naturally:
+Configure the MCP server (see Step 5), restart, and Claude can fully control Simulink.
+
+#### Claude Code (standalone skill — no MATLAB needed)
+
+Even without MATLAB or the MCP backend, you can still use the skill as a **Simulink knowledge base** for planning and discussion:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R skill/simubridge ~/.claude/skills/
+```
+
+Start a Claude Code session and ask:
 
 ```
-Open mymodel.slx, add a Gain block set to 2.5 after the Voltage Source
+Read the simubridge skill. I'm designing a motor control system in Simulink —
+suggest a block diagram layout with the right blocks and wiring topology.
 ```
 
-Claude Code will automatically read `SKILL.md` from the skill folder when it detects a Simulink-related request. The MCP server provides the actual tools; the skill teaches Claude how to use them correctly.
+Claude will read `SKILL.md` and `references/tool-guide.md` to give informed guidance — even without executing anything. This is useful for:
 
-> 💡 **How it works**: The MCP server registers tools via `@mcp.tool()` decorators — Claude discovers them automatically. The skill (`SKILL.md`) provides context: what each tool does, what parameters it needs, and best practices for using them together. Without the skill, Claude can still call tools but may not know the optimal workflow.
+- Planning model architecture before building it
+- Getting block library paths and parameter names for manual use
+- Learning Simulink workflows and best practices
+- Designing subsystem hierarchies and wiring strategies
+
+> 💡 **How it works**: The skill provides Claude with detailed knowledge of every Simulink tool, common library paths, port types, and wiring patterns. Claude can then advise you on model design even when the MCP backend isn't running.
 
 #### Codex
 
-```bash
-cp -R skills/simubridge ~/.codex/skills/
-```
+> ⚠️ Codex is not yet supported. We are working on Codex skill packaging. For now, use Claude Code.
 
 ### 5. Configure the MCP Server
 
@@ -164,7 +176,7 @@ If everything is configured correctly, Claude will:
 | **Subsystem** | `create_subsystem` / `expand_subsystem` / port management | Subsystem ops |
 | **Escape** | `eval_matlab` | Arbitrary MATLAB execution |
 
-> 📖 Complete tool documentation: [`skills/simubridge/SKILL.md`](skills/simubridge/SKILL.md)
+> 📖 Complete tool documentation: [`skill/simubridge/SKILL.md`](skill/simubridge/SKILL.md)
 
 ---
 
@@ -177,7 +189,7 @@ If everything is configured correctly, Claude will:
 └─────────────────┘                └──────────────┘                  └──────────────┘                └──────────┘
 ```
 
-- **Skill layer**: `skills/simubridge/SKILL.md` — teaches AI how to use each tool
+- **Skill layer**: `skill/simubridge/SKILL.md` — teaches AI how to use each tool
 - **Transport**: MCP stdio — local process, no network
 - **Engine**: `matlab.engine` API — connects to your running MATLAB session
 - **Auto-save**: every write operation auto-saves the model
@@ -188,7 +200,7 @@ If everything is configured correctly, Claude will:
 
 ```
 simubridge-skills/
-├── skills/simubridge/               # 🎯 Skill pack (primary)
+├── skill/simubridge/               # 🎯 Skill pack (primary)
 │   ├── README.md                    #    Skill documentation
 │   ├── SKILL.md                     #    Skill definition (bilingual tool reference)
 │   └── references/

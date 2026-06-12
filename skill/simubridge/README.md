@@ -49,12 +49,12 @@ matlab.engine.shareEngine('SIMULINK_MCP_SESSION')
 
 **Claude Code:**
 ```bash
-cp -R skills/simubridge ~/.claude/skills/
+cp -R skill/simubridge ~/.claude/skills/
 ```
 
 **Codex:**
 ```bash
-cp -R skills/simubridge ~/.codex/skills/
+cp -R skill/simubridge ~/.codex/skills/
 ```
 
 ### 4. Configure MCP in your AI assistant
@@ -75,7 +75,7 @@ cp -R skills/simubridge ~/.codex/skills/
 ## 📂 Skill structure
 
 ```
-skills/simubridge/
+skill/simubridge/
 ├── SKILL.md              # 技能定义 · Skill definition (中英双语工具详解)
 ├── README.md             # 本文件 · This file
 └── references/

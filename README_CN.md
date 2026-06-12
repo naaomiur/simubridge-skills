@@ -19,7 +19,7 @@
 
 `simubridge-skills` 是一个 **Claude Code / Codex 技能项目**，让 AI 助手能直接用自然语言操控 MATLAB Simulink。它包含：
 
-- 🎯 **技能包**（`skills/simubridge/`）— 教 AI 如何高效使用 Simulink 工具的提示词集合
+- 🎯 **技能包**（`skill/simubridge/`）— 教 AI 如何高效使用 Simulink 工具的提示词集合
 - 🔧 **MCP 服务端**（`src/simubridge/`）— 连接 MATLAB 引擎的本地后端，提供 20+ 个工具
 
 **技能是主体，MCP 是后端。** 用户安装技能后，AI 就知道如何一步步构建、修改、仿真 Simulink 模型。
@@ -30,7 +30,7 @@
 
 | 技能 | 状态 | 用途 | 触发词 |
 |-------|------|------|--------|
-| [`simubridge`](skills/simubridge/README.md) | Stable | Simulink 模型创建、查看、修改、仿真 | "Simulink"、"打开模型"、"加个模块"、"连线"、"仿真"、"子系统" |
+| [`simubridge`](skill/simubridge/README.md) | Stable | Simulink 模型创建、查看、修改、仿真 | "Simulink"、"打开模型"、"加个模块"、"连线"、"仿真"、"子系统" |
 
 ---
 
@@ -82,33 +82,44 @@ matlab.engine.shareEngine('SIMULINK_MCP_SESSION')
 
 技能文件教 Claude 如何高效使用 Simulink 工具。**必须复制整个文件夹**（不能只复制 `SKILL.md`）——`references/` 目录是技能需要的。
 
-> ⚠️ 只复制 `SKILL.md` 会导致技能静默失效。务必复制整个 `skills/simubridge/` 文件夹。
+> ⚠️ 只复制 `SKILL.md` 会导致技能静默失效。务必复制整个 `skill/simubridge/` 文件夹。
 
-#### Claude Code
+#### Claude Code（配合 MCP — 完整功能）
 
 ```bash
-# 如果目录不存在则创建
 mkdir -p ~/.claude/skills
-
-# 复制整个技能文件夹（不要只复制 SKILL.md）
-cp -R skills/simubridge ~/.claude/skills/
+cp -R skill/simubridge ~/.claude/skills/
 ```
 
-复制完成后，技能在**项目级别**生效。启动新的 Claude Code 会话，直接用自然语言提问：
+配置 MCP 服务端（见第 5 步），重启后 Claude 可以完整操控 Simulink。
+
+#### Claude Code（独立技能 — 无需 MATLAB）
+
+即使没有 MATLAB 和 MCP 后端，你仍然可以把技能当作 **Simulink 知识库**来规划和讨论：
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R skill/simubridge ~/.claude/skills/
+```
+
+启动 Claude Code 会话后说：
 
 ```
-打开 mymodel.slx，在 Voltage Source 后面加一个 Gain 模块，增益设为 2.5
+读取 simubridge 技能。我在设计一个电机控制系统，帮我规划模块布局和接线拓扑。
 ```
 
-Claude Code 检测到 Simulink 相关请求时，会自动从技能文件夹读取 `SKILL.md`。MCP 服务端提供实际工具，技能教 Claude 如何正确使用它们。
+Claude 会读取 `SKILL.md` 和 `references/tool-guide.md`，即使不执行任何操作也能给出专业建议。适用于：
 
-> 💡 **工作原理**：MCP 服务端通过 `@mcp.tool()` 装饰器注册工具——Claude 自动发现它们。技能（`SKILL.md`）提供上下文：每个工具做什么、需要什么参数、如何组合使用。没有技能，Claude 也能调用工具，但可能不知道最优操作流程。
+- 搭建模型前规划架构
+- 获取模块的库路径和参数名，手动操作时参考
+- 学习 Simulink 工作流和最佳实践
+- 设计子系统层级和连线策略
+
+> 💡 **工作原理**：技能文件包含每个 Simulink 工具的详细说明、常用库路径、端口类型和连线模式。Claude 即使不连 MCP，也能基于这些知识帮你设计模型。
 
 #### Codex
 
-```bash
-cp -R skills/simubridge ~/.codex/skills/
-```
+> ⚠️ Codex 暂不支持。我们正在开发 Codex 技能包。目前请使用 Claude Code。
 
 ### 5. 配置 MCP 服务端
 
@@ -168,7 +179,7 @@ MCP 服务端需要配置好，AI 助手才能连接。
 | **子系统** | `create_subsystem` / `expand_subsystem` / 端口管理 | 子系统操作 |
 | **万能** | `eval_matlab` | 执行任意 MATLAB 代码 |
 
-> 📖 完整中英双语工具说明：[`skills/simubridge/SKILL.md`](skills/simubridge/SKILL.md)
+> 📖 完整中英双语工具说明：[`skill/simubridge/SKILL.md`](skill/simubridge/SKILL.md)
 
 ---
 
@@ -181,7 +192,7 @@ MCP 服务端需要配置好，AI 助手才能连接。
 └─────────────────┘               └──────────────┘                  └──────────────┘               └──────────┘
 ```
 
-- **技能层**：`skills/simubridge/SKILL.md` — 教 AI 每个工具的用途和参数
+- **技能层**：`skill/simubridge/SKILL.md` — 教 AI 每个工具的用途和参数
 - **传输层**：MCP stdio — 本地进程通信，无网络依赖
 - **引擎层**：`matlab.engine` API — 连接你正在使用的 MATLAB 会话
 - **自动保存**：每次写入操作后自动保存，GUI 中立即可见
@@ -192,7 +203,7 @@ MCP 服务端需要配置好，AI 助手才能连接。
 
 ```
 simubridge-skills/
-├── skills/simubridge/               # 🎯 技能包（主体）
+├── skill/simubridge/               # 🎯 技能包（主体）
 │   ├── README.md                    #    技能说明
 │   ├── SKILL.md                     #    技能定义（中英双语工具详解）
 │   └── references/
