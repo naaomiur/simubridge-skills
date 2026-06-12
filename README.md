@@ -3,6 +3,8 @@
   <img src="https://img.shields.io/badge/MCP-1.2+-green.svg" alt="MCP">
   <img src="https://img.shields.io/badge/MATLAB-R2021a+-orange.svg" alt="MATLAB">
   <img src="https://img.shields.io/badge/license-MIT-purple.svg" alt="License">
+  <br>
+  <img src="https://img.shields.io/github/stars/naaomiur/simubridge-skills?style=social" alt="Stars">
 </p>
 
 # 🔗 SimuBridge
