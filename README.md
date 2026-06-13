@@ -9,50 +9,54 @@
 
 # 🔗 SimuBridge
 
-> AI-Powered Simulink Skill Pack with MCP Backend
+> AI 驱动的 Simulink 技能包 + MCP 后端
 
-[中文文档](README_CN.md)
-
----
-
-## What is this
-
-`simubridge-skills` is a **Claude Code / Codex skill project** that lets AI assistants control MATLAB Simulink using natural language. It contains:
-
-- 🎯 **Skill pack** (`skill/simubridge/`) — prompt bundle that teaches AI how to use Simulink tools effectively
-- 🔧 **MCP server** (`src/simubridge/`) — local backend connecting to MATLAB Engine with 20+ tools
-
-**The skill is the product. The MCP server is the backend.**
+[English README](README_EN.md)
 
 ---
 
-## Skill Index
+## 这是什么
 
-| Skill | Status | Purpose | Trigger Keywords |
-|-------|--------|---------|-----------------|
-| [`simubridge`](skill/simubridge/README.md) | Stable | Simulink model creation, inspection, modification, and simulation | "Simulink", "open model", "add block", "connect", "simulate", "subsystem" |
+`simubridge-skills` 是一个 **Claude Code / Codex 技能项目**，让 AI 助手能直接用自然语言操控 MATLAB Simulink。它包含：
+
+- 🎯 **技能包**（`skill/simubridge/`）— 教 AI 如何高效使用 Simulink 工具的提示词集合
+- 🔧 **MCP 服务端**（`src/simubridge/`）— 连接 MATLAB 引擎的本地后端，提供 20+ 个工具
+
+**技能是主体，MCP 是后端。** 用户安装技能后，AI 就知道如何一步步构建、修改、仿真 Simulink 模型。
 
 ---
 
-## Quick Start
+## 技能索引
 
-### Prerequisites
+| 技能 | 状态 | 用途 | 触发词 |
+|-------|------|------|--------|
+| [`simubridge`](skill/simubridge/README.md) | Stable | Simulink 模型创建、查看、修改、仿真 | "Simulink"、"打开模型"、"加个模块"、"连线"、"仿真"、"子系统" |
 
-- **MATLAB R2021a+** with Simulink
-- **Python 3.9–3.12**
+---
 
-### 1. Install MATLAB Engine for Python
+## 快速开始
+
+### 环境要求
+
+- **MATLAB R2021a+**（需包含 Simulink）
+- **Python 3.9–3.12**（3.13+ 暂不支持 MATLAB 引擎）
+
+### 1. 安装 MATLAB Python 引擎
+
+> ⚠️ 必须完成！SimuBridge 通过 `matlab.engine` API 连接 MATLAB。
+
+在 MATLAB 中运行 `matlabroot` 获取安装路径（如 `C:\Program Files\MATLAB\R2024a`），然后在终端中：
 
 ```cmd
 cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
 python setup.py install
 ```
 
-Verify: `python -c "import matlab.engine; print('OK')"`
+验证：`python -c "import matlab.engine; print('OK')"`
 
-> 💡 Permission error? Add `--user`. Python 3.13+? Downgrade to 3.11 or 3.12.
+> 💡 权限错误加 `--user`；Python 3.13+ 需降级到 3.11 或 3.12。
 
-### 2. Install the MCP Backend
+### 2. 安装 MCP 后端
 
 ```bash
 git clone https://github.com/naaomiur/simubridge-skills.git
@@ -60,73 +64,73 @@ cd simubridge-skills
 pip install -e .
 ```
 
-### 3. Configure MATLAB
+### 3. 配置 MATLAB 共享引擎
 
-Run in MATLAB:
+在 MATLAB 命令窗口中运行：
 
 ```matlab
 matlab.engine.shareEngine('SIMULINK_MCP_SESSION')
 ```
 
-> 💡 Add to `startup.m` for auto-share on every launch:
+> 💡 建议写入 `startup.m` 每次自动共享：
 > ```matlab
 > edit(fullfile(userpath, 'startup.m'))
 > ```
+> 在打开的文件中添加 `matlab.engine.shareEngine('SIMULINK_MCP_SESSION');`，保存并重启 MATLAB。
 
-### 4. Install the Skill
+### 4. 安装技能
 
-The skill teaches Claude how to use Simulink tools effectively. Copy the entire folder (not just `SKILL.md`) — the `references/` directory is needed by the skill.
+技能文件教 Claude 如何高效使用 Simulink 工具。**必须复制整个文件夹**（不能只复制 `SKILL.md`）——`references/` 目录是技能需要的。
 
-> ⚠️ Only copying `SKILL.md` will silently break the skill. Always copy the whole `skill/simubridge/` folder.
+> ⚠️ 只复制 `SKILL.md` 会导致技能静默失效。务必复制整个 `skill/simubridge/` 文件夹。
 
-#### Claude Code (with MCP — full functionality)
-
-```bash
-mkdir -p ~/.claude/skills
-cp -R skill/simubridge ~/.claude/skills/
-```
-
-Configure the MCP server (see Step 5), restart, and Claude can fully control Simulink.
-
-#### Claude Code (standalone skill — no MATLAB needed)
-
-Even without MATLAB or the MCP backend, you can still use the skill as a **Simulink knowledge base** for planning and discussion:
+#### Claude Code（配合 MCP — 完整功能）
 
 ```bash
 mkdir -p ~/.claude/skills
 cp -R skill/simubridge ~/.claude/skills/
 ```
 
-Start a Claude Code session and ask:
+配置 MCP 服务端（见第 5 步），重启后 Claude 可以完整操控 Simulink。
+
+#### Claude Code（独立技能 — 无需 MATLAB）
+
+即使没有 MATLAB 和 MCP 后端，你仍然可以把技能当作 **Simulink 知识库**来规划和讨论：
+
+```bash
+mkdir -p ~/.claude/skills
+cp -R skill/simubridge ~/.claude/skills/
+```
+
+启动 Claude Code 会话后说：
 
 ```
-Read the simubridge skill. I'm designing a motor control system in Simulink —
-suggest a block diagram layout with the right blocks and wiring topology.
+读取 simubridge 技能。我在设计一个电机控制系统，帮我规划模块布局和接线拓扑。
 ```
 
-Claude will read `SKILL.md` and `references/tool-guide.md` to give informed guidance — even without executing anything. This is useful for:
+Claude 会读取 `SKILL.md` 和 `references/tool-guide.md`，即使不执行任何操作也能给出专业建议。适用于：
 
-- Planning model architecture before building it
-- Getting block library paths and parameter names for manual use
-- Learning Simulink workflows and best practices
-- Designing subsystem hierarchies and wiring strategies
+- 搭建模型前规划架构
+- 获取模块的库路径和参数名，手动操作时参考
+- 学习 Simulink 工作流和最佳实践
+- 设计子系统层级和连线策略
 
-> 💡 **How it works**: The skill provides Claude with detailed knowledge of every Simulink tool, common library paths, port types, and wiring patterns. Claude can then advise you on model design even when the MCP backend isn't running.
+> 💡 **工作原理**：技能文件包含每个 Simulink 工具的详细说明、常用库路径、端口类型和连线模式。Claude 即使不连 MCP，也能基于这些知识帮你设计模型。
 
 #### Codex
 
-> ⚠️ Codex is not yet supported. We are working on Codex skill packaging. For now, use Claude Code.
+> ⚠️ Codex 暂不支持。我们正在开发 Codex 技能包。目前请使用 Claude Code。
 
-### 5. Configure the MCP Server
+### 5. 配置 MCP 服务端
 
-The MCP server must be configured so the AI assistant can connect to it.
+MCP 服务端需要配置好，AI 助手才能连接。
 
 #### Claude Code
 
-Add to `claude_desktop_config.json`:
+添加到 `claude_desktop_config.json`：
 
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**：`%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS**：`~/Library/Application Support/Claude/claude_desktop_config.json`
 
 ```json
 {
@@ -139,95 +143,94 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-You can also copy the included [`claude_desktop_config.json`](claude_desktop_config.json) directly.
+也可以直接复制仓库中附带的 [`claude_desktop_config.json`](claude_desktop_config.json)。
 
 #### Codex
 
-Add the same configuration in Codex's MCP settings panel.
+在 Codex 的 MCP 设置面板中添加同样配置。
 
-#### Verify Installation
+#### 验证安装
 
-Restart your AI assistant. Start a new session and try:
+重启 AI 助手，新建会话试试：
 
 ```
-Open mymodel.slx, add a Gain block set to 2.5 after the Voltage Source,
-and connect it to a Scope
+打开 mymodel.slx，在 Voltage Source 后面加一个 Gain 模块，增益设为 2.5，连到 Scope
 ```
 
-If everything is configured correctly, Claude will:
-1. Recognize the Simulink task
-2. Read the skill definitions from `SKILL.md`
-3. Call MCP tools like `search_library`, `add_block`, `connect` to complete the task
+配置正确的话，Claude 会：
+1. 识别 Simulink 任务
+2. 从 `SKILL.md` 读取技能定义
+3. 依次调用 `search_library`、`add_block`、`connect` 等 MCP 工具完成任务
 
 ---
 
-## What the Skill Can Do
+## 技能能力
 
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **Model** | `open_model` / `create_model` / `close_model` / `save_model` | Model lifecycle |
-| **Block** | `add_block` / `delete_block` / `search_library` / `describe_block` | Block management |
-| **Param** | `get_block_params` / `set_block_params` / `get_model_config` / `set_model_config` | Parameter configuration |
-| **Wiring** | `connect` / `delete_line` | Signal/power wiring (batch supported) |
-| **Inspect** | `model_audit` / `get_block_ports` | Topology audit |
-| **Stateflow** | `get_mfunction_code` / `set_mfunction_code` | MATLAB Function code |
-| **Simulation** | `simulate_and_analyze_waveform` | Simulation + waveform analysis |
-| **Workspace** | `get_workspace_vars` / `set_workspace_vars` | MATLAB workspace |
-| **Subsystem** | `create_subsystem` / `expand_subsystem` / port management | Subsystem ops |
-| **Escape** | `eval_matlab` | Arbitrary MATLAB execution |
+| 分类 | 工具 | 功能 |
+|------|------|------|
+| **模型** | `open_model` / `create_model` / `close_model` / `save_model` | 模型生命周期 |
+| **模块** | `add_block` / `delete_block` / `search_library` / `describe_block` | 模块管理 |
+| **参数** | `get_block_params` / `set_block_params` / `get_model_config` / `set_model_config` | 参数配置 |
+| **连线** | `connect` / `delete_line` | 信号/功率连线（支持批量） |
+| **检查** | `model_audit` / `get_block_ports` | 拓扑审计 |
+| **Stateflow** | `get_mfunction_code` / `set_mfunction_code` | MATLAB Function 代码读写 |
+| **仿真** | `simulate_and_analyze_waveform` | 仿真 + 波形分析 |
+| **工作区** | `get_workspace_vars` / `set_workspace_vars` | MATLAB 工作区读写 |
+| **子系统** | `create_subsystem` / `expand_subsystem` / 端口管理 | 子系统操作 |
+| **万能** | `eval_matlab` | 执行任意 MATLAB 代码 |
 
-> 📖 Complete tool documentation: [`skill/simubridge/SKILL.md`](skill/simubridge/SKILL.md)
-
----
-
-## Architecture
-
-```
-┌─────────────────┐     Skill      ┌──────────────┐     MCP stdio     ┌──────────────┐   MATLAB API   ┌──────────┐
-│  Claude / Codex  │ ◄────────────  │  simubridge   │ ◄──────────────► │  MCP Server   │ ◄────────────► │  MATLAB  │
-│  + Skill Prompt  │                │  (skill def)  │                  │  (Python)     │                │(Simulink)│
-└─────────────────┘                └──────────────┘                  └──────────────┘                └──────────┘
-```
-
-- **Skill layer**: `skill/simubridge/SKILL.md` — teaches AI how to use each tool
-- **Transport**: MCP stdio — local process, no network
-- **Engine**: `matlab.engine` API — connects to your running MATLAB session
-- **Auto-save**: every write operation auto-saves the model
+> 📖 完整中英双语工具说明：[`skill/simubridge/SKILL.md`](skill/simubridge/SKILL.md)
 
 ---
 
-## Project Structure
+## 架构
+
+```
+┌─────────────────┐     技能       ┌──────────────┐    MCP stdio     ┌──────────────┐  MATLAB API  ┌──────────┐
+│  Claude / Codex  │ ◄───────────  │  simubridge   │ ◄──────────────► │  MCP Server   │ ◄───────────► │  MATLAB  │
+│  + 技能提示词     │               │  (技能定义)    │                  │  (Python 后端) │               │(Simulink)│
+└─────────────────┘               └──────────────┘                  └──────────────┘               └──────────┘
+```
+
+- **技能层**：`skill/simubridge/SKILL.md` — 教 AI 每个工具的用途和参数
+- **传输层**：MCP stdio — 本地进程通信，无网络依赖
+- **引擎层**：`matlab.engine` API — 连接你正在使用的 MATLAB 会话
+- **自动保存**：每次写入操作后自动保存，GUI 中立即可见
+
+---
+
+## 项目结构
 
 ```
 simubridge-skills/
-├── skill/simubridge/               # 🎯 Skill pack (primary)
-│   ├── README.md                    #    Skill documentation
-│   ├── SKILL.md                     #    Skill definition (bilingual tool reference)
+├── skill/simubridge/               # 🎯 技能包（主体）
+│   ├── README.md                    #    技能说明
+│   ├── SKILL.md                     #    技能定义（中英双语工具详解）
 │   └── references/
-│       └── tool-guide.md            #    Quick reference
-├── src/simubridge/                  # 🔧 MCP backend
-│   ├── __init__.py                  #    Entry point + tool registration
-│   ├── app.py                       #    FastMCP + MATLAB engine manager
-│   └── tools/                       #    7 tool modules
+│       └── tool-guide.md            #    工具速查表
+├── src/simubridge/                  # 🔧 MCP 后端
+│   ├── __init__.py                  #    入口 + 工具注册
+│   ├── app.py                       #    FastMCP + MATLAB 引擎管理
+│   └── tools/                       #    7 个工具模块
 ├── examples/
-│   └── basic_usage.md
+│   └── basic_usage.md               #    使用示例
 ├── pyproject.toml
 ├── claude_desktop_config.json
 ├── LICENSE
-├── README.md                        #    This file (English)
-└── README_CN.md                     #    Chinese version
+├── README.md                        #    中文版（本文件）
+└── README_EN.md                     #    英文版
 ```
 
 ---
 
-## License
+## 开源协议
 
-MIT License — see [LICENSE](LICENSE).
+MIT License — 详见 [LICENSE](LICENSE)。
 
-> ⚠️ MATLAB and Simulink are registered trademarks of The MathWorks, Inc. This project is not affiliated with or endorsed by MathWorks.
+> ⚠️ MATLAB 和 Simulink 是 The MathWorks, Inc. 的注册商标。本项目与 MathWorks 无关，亦未获其背书。
 
 ---
 
-## Acknowledgments
+## 致谢
 
-Built with [FastMCP](https://github.com/jlowin/fastmcp) and the [Model Context Protocol](https://modelcontextprotocol.io).
+基于 [FastMCP](https://github.com/jlowin/fastmcp) 和 [Model Context Protocol](https://modelcontextprotocol.io) 构建。
