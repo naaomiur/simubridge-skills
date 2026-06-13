@@ -1,0 +1,17 @@
+# 成员仓库根目录放一份这个文件，名字就叫 project.yaml
+# 字段说明见下方注释，可选字段留空或删掉都行
+
+name: SimuBridge Skills                     # 必填
+authors: [naaomiur]                         # 必填
+category: Tool                             # 必填：LLM / CV / Agent / Tool / Other
+tags: [MCP, Simulink, MATLAB, Skill, AI, 仿真, 模型]  # 可选
+status: in-progress                         # in-progress / done / archived
+updated: 2026-06-13                         # YYYY-MM-DD
+summary: AI驱动的Simulink技能包——通过MCP让Claude直接用自然语言创建、修改、仿真MATLAB Simulink模型，20+专用工具，全程本地运行。  # 必填
+
+cover:                                      # 可选，相对仓库路径或完整 URL
+demo: examples/basic_usage.md               # 可选
+readme: README.md                           # 可选，详情页拉哪个文件，默认 README.md
+
+links:                                      # 可选
+  repository: https://github.com/naaomiur/simubridge-skills
