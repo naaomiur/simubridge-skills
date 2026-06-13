@@ -346,7 +346,7 @@ def search_library(keyword: str, libraries: str = "", search_depth: int = 5) -> 
 
 
 @mcp.tool()
-def model_audit(model_name: str, depth: int = 5) -> str:
+def model_audit(model_name: str, depth: int = 7) -> str:
     """Read complete model topology: blocks, signal/power/implicit connections.
 
     Shows all four connection types:
