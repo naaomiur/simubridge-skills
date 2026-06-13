@@ -39,74 +39,118 @@
 ### 环境要求
 
 - **MATLAB R2021a+**（需包含 Simulink）
-- **Python 3.9–3.12**（3.13+ 暂不支持 MATLAB 引擎）
+- **Python 3.9–3.12**（⚠️ 3.13 不支持 MATLAB 引擎）
 
-### 1. 安装 MATLAB Python 引擎
+---
 
-> ⚠️ 必须完成！SimuBridge 通过 `matlab.engine` API 连接 MATLAB。
+### 第 1 步：准备正确的 Python 版本
 
-#### 步骤
+MATLAB 引擎**只支持 Python 3.9–3.12**。如果你的默认 Python 是 3.13+，需要单独安装一个 3.11/3.12。
 
-在 MATLAB 中运行 `matlabroot` 获取安装路径（如 `C:\Program Files\MATLAB\R2024a`），然后在终端中：
+> 本教程以 Python 3.12 为例，安装到 `P:\code\Python3.12`。你也可以用 3.11（`C:\Python311`）。
 
 ```cmd
-cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
-python setup.py install
+# 确认你的 Python 版本
+python --version
+```
+
+如果显示 `3.13.x`，从 https://www.python.org 下载安装 Python 3.12，**取消勾选 "Add to PATH"**，安装到自定义路径（如 `P:\code\Python3.12`）。
+
+---
+
+### 第 2 步：安装 MATLAB Python 引擎
+
+在 MATLAB 中运行 `matlabroot` 获取安装路径，然后用你准备好的 Python 安装引擎：
+
+```cmd
+# 先装 setuptools
+P:\code\Python3.12\python.exe -m pip install setuptools
+
+# 进入 MATLAB 引擎目录（路径换成你的）
+cd "你的MATLAB路径\extern\engines\python"
+P:\code\Python3.12\python.exe setup.py install
 ```
 
 验证：
 
 ```cmd
-python -c "import matlab.engine; print('OK')"
+P:\code\Python3.12\python.exe -c "import matlab.engine; print('OK')"
 ```
 
-#### 常见问题排查
+#### 常见问题
 
-| 错误信息 | 原因 | 解决方法 |
+| 错误 | 原因 | 解决 |
 |------|------|------|
-| `Install setuptools` / `ModuleNotFoundError: No module named 'setuptools'` | 缺少 setuptools | `python -m pip install setuptools` |
-| `permission denied` / 权限不足 | 没有管理员权限 | `python setup.py install --user` |
-| `supports Python version 3.9, 3.10, 3.11, and 3.12, but your version is 3.13` | Python 版本太高，MATLAB 引擎只支持 3.9–3.12 | 使用 Python 3.11/3.12 运行安装（见下方） |
-| `'matlab' is not a package` | 当前目录有同名 matlab 文件夹冲突 | 换个目录运行验证命令 |
+| `Install setuptools` | 缺少 setuptools | `python -m pip install setuptools` |
+| `permission denied` | 无管理员权限 | `python setup.py install --user` |
+| `supports Python 3.9–3.12, but your version is 3.13` | Python 版本太高 | 用第 1 步装的 3.12 运行 |
+| `'matlab' is not a package` | 当前目录冲突 | 换个目录运行验证命令 |
 
-#### Python 3.13 用户的解决方案
+---
 
-MATLAB 引擎目前最高支持 Python 3.12。如果你的默认 Python 是 3.13，需要用一个 3.11/3.12 的 Python 来安装和运行。
+### 第 3 步：安装 MCP 后端
 
-安装 Python 3.11 或 3.12，记住安装路径（默认 `C:\Python311` 或 `C:\Users\你的用户名\AppData\Local\Programs\Python\Python311`），然后：
+```bash
+git clone https://github.com/naaomiur/simubridge-skills.git
+cd simubridge-skills
+
+# 用你准备好的 Python 安装
+P:\code\Python3.12\python.exe -m pip install -e .
+```
+
+验证：
 
 ```cmd
-# 找到你的 Python 安装路径，替换下面的 C:\Python311
-C:\Python3.11\python.exe -m pip install setuptools
-cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
-C:\Python3.11\python.exe setup.py install
-C:\Python3.11\python.exe -c "import matlab.engine; print('OK')"
+P:\code\Python3.12\python.exe -m simubridge
 ```
 
-安装成功后，MCP 配置也要指向这个 Python：
+> ⚠️ 终端会卡住不退出——这是正常的，MCP 在等待 stdio 连接。按 `Ctrl+C` 停掉。
+
+---
+
+### 第 4 步：配置 Claude Code MCP
+
+编辑 `C:\Users\你的用户名\.claude.json`，在 `"mcpServers"` 中添加：
+
+```json
+"simubridge": {
+  "command": "P:\\code\\Python3.12\\python.exe",
+  "args": ["-m", "simubridge"]
+}
+```
+
+> ⚠️ JSON 不支持注释，不要把说明文字写进去。路径里反斜杠要双写 `\\`。
+
+完整示例：
 
 ```json
 {
   "mcpServers": {
     "simubridge": {
-      "command": "C:\\Python3.11\\python.exe",（你的python路径）
+      "command": "P:\\code\\Python3.12\\python.exe",
       "args": ["-m", "simubridge"]
     }
   }
 }
 ```
 
-如果没有旧版 Python，去 https://www.python.org/downloads/release/python-3119/ 下载安装 Python 3.11，取消勾选 "Add to PATH"。
+保存后**重启 Claude Code**。
 
-### 2. 安装 MCP 后端
+---
 
-```bash
-git clone https://github.com/naaomiur/simubridge-skills.git
-cd simubridge-skills
-pip install -e .
+### 第 5 步：验证 MCP 连接
+
+在 Claude Code 中输入：
+
+```
+/mcp
 ```
 
-### 3. 配置 MATLAB 共享引擎
+看到 `simubridge` 显示**绿色 Connected** 即成功。26 个工具自动加载。
+
+---
+
+### 第 6 步：配置 MATLAB 共享引擎
 
 在 MATLAB 命令窗口中运行：
 
@@ -114,95 +158,31 @@ pip install -e .
 matlab.engine.shareEngine('SIMULINK_MCP_SESSION')
 ```
 
-> 💡 建议写入 `startup.m` 每次自动共享：
+> 💡 写入 `startup.m` 每次启动自动共享：
 > ```matlab
 > edit(fullfile(userpath, 'startup.m'))
 > ```
-> 在打开的文件中添加 `matlab.engine.shareEngine('SIMULINK_MCP_SESSION');`，保存并重启 MATLAB。
 
-### 4. 安装技能
+---
 
-技能文件教 Claude 如何高效使用 Simulink 工具。**必须复制整个文件夹**（不能只复制 `SKILL.md`）——`references/` 目录是技能需要的。
-
-> ⚠️ 只复制 `SKILL.md` 会导致技能静默失效。务必复制整个 `skill/simubridge/` 文件夹。
-
-#### Claude Code（配合 MCP — 完整功能）
+### 第 7 步：安装技能
 
 ```bash
 mkdir -p ~/.claude/skills
 cp -R skill/simubridge ~/.claude/skills/
 ```
 
-配置 MCP 服务端（见第 5 步），重启后 Claude 可以完整操控 Simulink。
+技能教 Claude 如何高效使用 Simulink 工具。即使不装也能用（MCP 自带工具描述），装了效果更好。
 
-#### Claude Code（独立技能 — 无需 MATLAB）
+---
 
-即使没有 MATLAB 和 MCP 后端，你仍然可以把技能当作 **Simulink 知识库**来规划和讨论：
+### 开始使用
 
-```bash
-mkdir -p ~/.claude/skills
-cp -R skill/simubridge ~/.claude/skills/
-```
-
-启动 Claude Code 会话后说：
+在 Claude Code 中试试：
 
 ```
-读取 simubridge 技能。我在设计一个电机控制系统，帮我规划模块布局和接线拓扑。
+打开 mymodel.slx，在 Voltage Source 后面加一个 Gain 模块，增益 2.5，连到 Scope
 ```
-
-Claude 会读取 `SKILL.md` 和 `references/tool-guide.md`，即使不执行任何操作也能给出专业建议。适用于：
-
-- 搭建模型前规划架构
-- 获取模块的库路径和参数名，手动操作时参考
-- 学习 Simulink 工作流和最佳实践
-- 设计子系统层级和连线策略
-
-> 💡 **工作原理**：技能文件包含每个 Simulink 工具的详细说明、常用库路径、端口类型和连线模式。Claude 即使不连 MCP，也能基于这些知识帮你设计模型。
-
-#### Codex
-
-> ⚠️ Codex 暂不支持。我们正在开发 Codex 技能包。目前请使用 Claude Code。
-
-### 5. 配置 MCP 服务端
-
-MCP 服务端需要配置好，AI 助手才能连接。
-
-#### Claude Code
-
-添加到 `claude_desktop_config.json`：
-
-- **Windows**：`%APPDATA%\Claude\claude_desktop_config.json`
-- **macOS**：`~/Library/Application Support/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "simubridge": {
-      "command": "python",
-      "args": ["-m", "simubridge"]
-    }
-  }
-}
-```
-
-也可以直接复制仓库中附带的 [`claude_desktop_config.json`](claude_desktop_config.json)。
-
-#### Codex
-
-在 Codex 的 MCP 设置面板中添加同样配置。
-
-#### 验证安装
-
-重启 AI 助手，新建会话试试：
-
-```
-打开 mymodel.slx，在 Voltage Source 后面加一个 Gain 模块，增益设为 2.5，连到 Scope
-```
-
-配置正确的话，Claude 会：
-1. 识别 Simulink 任务
-2. 从 `SKILL.md` 读取技能定义
-3. 依次调用 `search_library`、`add_block`、`connect` 等 MCP 工具完成任务
 
 ---
 

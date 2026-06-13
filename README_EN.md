@@ -39,170 +39,151 @@
 ### Prerequisites
 
 - **MATLAB R2021a+** with Simulink
-- **Python 3.9–3.12**
+- **Python 3.9–3.12** (⚠️ 3.13 not supported by MATLAB Engine)
 
-### 1. Install MATLAB Engine for Python
+---
 
-> ⚠️ Required! SimuBridge connects to MATLAB via the `matlab.engine` API.
+### Step 1: Get the Right Python Version
 
-#### Steps
+MATLAB Engine **only supports Python 3.9–3.12**. If your default Python is 3.13+, install a separate 3.11 or 3.12.
 
-Run `matlabroot` in MATLAB to get the install path (e.g. `C:\Program Files\MATLAB\R2024a`), then in terminal:
+> This tutorial uses Python 3.12 installed to `P:\code\Python3.12`. You can also use 3.11 (`C:\Python311`).
 
 ```cmd
-cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
-python setup.py install
+# Check your Python version
+python --version
+```
+
+If it says `3.13.x`, download Python 3.12 from https://www.python.org, **uncheck "Add to PATH"**, install to a custom path.
+
+---
+
+### Step 2: Install MATLAB Engine for Python
+
+Run `matlabroot` in MATLAB to get the install path, then install with your prepared Python:
+
+```cmd
+# Install setuptools first
+P:\code\Python3.12\python.exe -m pip install setuptools
+
+# Navigate to MATLAB engine directory (replace with your path)
+cd "your-MATLAB-path\extern\engines\python"
+P:\code\Python3.12\python.exe setup.py install
 ```
 
 Verify:
 
 ```cmd
-python -c "import matlab.engine; print('OK')"
+P:\code\Python3.12\python.exe -c "import matlab.engine; print('OK')"
 ```
 
 #### Troubleshooting
 
 | Error | Cause | Fix |
 |------|------|------|
-| `Install setuptools` / `No module named 'setuptools'` | setuptools missing | `python -m pip install setuptools` |
+| `Install setuptools` | setuptools missing | `python -m pip install setuptools` |
 | `permission denied` | No admin rights | `python setup.py install --user` |
-| `supports Python version 3.9, 3.10, 3.11, and 3.12, but your version is 3.13` | Python too new, MATLAB Engine supports 3.9–3.12 only | Use Python 3.11/3.12 (see below) |
+| `supports Python 3.9–3.12, but your version is 3.13` | Python too new | Use the Python 3.12 from Step 1 |
+| `'matlab' is not a package` | Directory conflict | Run verify from a different directory |
 
-#### Python 3.13 Users
+---
 
-MATLAB Engine supports Python 3.12 max. If your default Python is 3.13, install and run with a 3.11/3.12 Python instead.
+### Step 3: Install the MCP Backend
 
-Install Python 3.11 or 3.12 (default path is `C:\Python311` or `C:\Users\<username>\AppData\Local\Programs\Python\Python311`), then:
+```bash
+git clone https://github.com/naaomiur/simubridge-skills.git
+cd simubridge-skills
 
-```cmd
-# Replace the path below with your Python install path
-C:\Python3.11\python.exe -m pip install setuptools
-cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
-C:\Python3.11\python.exe setup.py install
-C:\Python3.11\python.exe -c "import matlab.engine; print('OK')"
+# Install with your prepared Python
+P:\code\Python3.12\python.exe -m pip install -e .
 ```
 
-Then point the MCP config to this Python:
+Verify:
+
+```cmd
+P:\code\Python3.12\python.exe -m simubridge
+```
+
+> ⚠️ The terminal will hang — this is normal, MCP is waiting for stdio. Press `Ctrl+C` to stop.
+
+---
+
+### Step 4: Configure Claude Code MCP
+
+Edit `C:\Users\<username>\.claude.json`, add under `"mcpServers"`:
+
+```json
+"simubridge": {
+  "command": "P:\\code\\Python3.12\\python.exe",
+  "args": ["-m", "simubridge"]
+}
+```
+
+> ⚠️ JSON doesn't support comments. Double backslashes `\\` in paths.
+
+Full example:
 
 ```json
 {
   "mcpServers": {
     "simubridge": {
-      "command": "C:\\Python3.11\\python.exe",
+      "command": "P:\\code\\Python3.12\\python.exe",
       "args": ["-m", "simubridge"]
     }
   }
 }
 ```
 
-If you don't have an older Python, download Python 3.11 from https://www.python.org/downloads/release/python-3119/ and **uncheck** "Add to PATH" during install.
+Save and **restart Claude Code**.
 
-### 2. Install the MCP Backend
+---
 
-```bash
-git clone https://github.com/naaomiur/simubridge-skills.git
-cd simubridge-skills
-pip install -e .
+### Step 5: Verify MCP Connection
+
+In Claude Code, run:
+
+```
+/mcp
 ```
 
-### 3. Configure MATLAB
+`simubridge` should show **green Connected** with 26 tools loaded.
 
-Run in MATLAB:
+---
+
+### Step 6: Configure MATLAB
+
+In MATLAB command window:
 
 ```matlab
 matlab.engine.shareEngine('SIMULINK_MCP_SESSION')
 ```
 
-> 💡 Add to `startup.m` for auto-share on every launch:
+> 💡 Add to `startup.m` for auto-share:
 > ```matlab
 > edit(fullfile(userpath, 'startup.m'))
 > ```
 
-### 4. Install the Skill
+---
 
-The skill teaches Claude how to use Simulink tools effectively. Copy the entire folder (not just `SKILL.md`) — the `references/` directory is needed by the skill.
-
-> ⚠️ Only copying `SKILL.md` will silently break the skill. Always copy the whole `skill/simubridge/` folder.
-
-#### Claude Code (with MCP — full functionality)
+### Step 7: Install the Skill (Recommended)
 
 ```bash
 mkdir -p ~/.claude/skills
 cp -R skill/simubridge ~/.claude/skills/
 ```
 
-Configure the MCP server (see Step 5), restart, and Claude can fully control Simulink.
+The skill teaches Claude how to use Simulink tools effectively. MCP works without it, but the skill improves results.
 
-#### Claude Code (standalone skill — no MATLAB needed)
+---
 
-Even without MATLAB or the MCP backend, you can still use the skill as a **Simulink knowledge base** for planning and discussion:
+### Try It
 
-```bash
-mkdir -p ~/.claude/skills
-cp -R skill/simubridge ~/.claude/skills/
-```
-
-Start a Claude Code session and ask:
-
-```
-Read the simubridge skill. I'm designing a motor control system in Simulink —
-suggest a block diagram layout with the right blocks and wiring topology.
-```
-
-Claude will read `SKILL.md` and `references/tool-guide.md` to give informed guidance — even without executing anything. This is useful for:
-
-- Planning model architecture before building it
-- Getting block library paths and parameter names for manual use
-- Learning Simulink workflows and best practices
-- Designing subsystem hierarchies and wiring strategies
-
-> 💡 **How it works**: The skill provides Claude with detailed knowledge of every Simulink tool, common library paths, port types, and wiring patterns. Claude can then advise you on model design even when the MCP backend isn't running.
-
-#### Codex
-
-> ⚠️ Codex is not yet supported. We are working on Codex skill packaging. For now, use Claude Code.
-
-### 5. Configure the MCP Server
-
-The MCP server must be configured so the AI assistant can connect to it.
-
-#### Claude Code
-
-Add to `claude_desktop_config.json`:
-
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "simubridge": {
-      "command": "python",
-      "args": ["-m", "simubridge"]
-    }
-  }
-}
-```
-
-You can also copy the included [`claude_desktop_config.json`](claude_desktop_config.json) directly.
-
-#### Codex
-
-Add the same configuration in Codex's MCP settings panel.
-
-#### Verify Installation
-
-Restart your AI assistant. Start a new session and try:
+In Claude Code:
 
 ```
 Open mymodel.slx, add a Gain block set to 2.5 after the Voltage Source,
 and connect it to a Scope
 ```
-
-If everything is configured correctly, Claude will:
-1. Recognize the Simulink task
-2. Read the skill definitions from `SKILL.md`
-3. Call MCP tools like `search_library`, `add_block`, `connect` to complete the task
 
 ---
 
