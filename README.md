@@ -47,14 +47,14 @@
 
 MATLAB 引擎**只支持 Python 3.9–3.12**。如果你的默认 Python 是 3.13+，需要单独安装一个 3.11/3.12。
 
-> 本教程以 Python 3.12 为例，安装到 `P:\code\Python3.12`。你也可以用 3.11（`C:\Python311`）。
+> 本教程以 Python 3.12 为例，安装到 `C:\Python312`。你也可以用 3.11（`C:\Python311`）。
 
 ```cmd
 # 确认你的 Python 版本
 python --version
 ```
 
-如果显示 `3.13.x`，从 https://www.python.org 下载安装 Python 3.12，**取消勾选 "Add to PATH"**，安装到自定义路径（如 `P:\code\Python3.12`）。
+如果显示 `3.13.x`，从 https://www.python.org 下载安装 Python 3.12，**取消勾选 "Add to PATH"**，安装到自定义路径（如 `C:\Python312`）。
 
 ---
 
@@ -64,17 +64,17 @@ python --version
 
 ```cmd
 # 先装 setuptools
-P:\code\Python3.12\python.exe -m pip install setuptools
+C:\Python312\python.exe -m pip install setuptools
 
 # 进入 MATLAB 引擎目录（路径换成你的）
 cd "你的MATLAB路径\extern\engines\python"
-P:\code\Python3.12\python.exe setup.py install
+C:\Python312\python.exe setup.py install
 ```
 
 验证：
 
 ```cmd
-P:\code\Python3.12\python.exe -c "import matlab.engine; print('OK')"
+C:\Python312\python.exe -c "import matlab.engine; print('OK')"
 ```
 
 #### 常见问题
@@ -95,13 +95,13 @@ git clone https://github.com/naaomiur/simubridge-skills.git
 cd simubridge-skills
 
 # 用你准备好的 Python 安装
-P:\code\Python3.12\python.exe -m pip install -e .
+C:\Python312\python.exe -m pip install -e .
 ```
 
 验证：
 
 ```cmd
-P:\code\Python3.12\python.exe -m simubridge
+C:\Python312\python.exe -m simubridge
 ```
 
 > ⚠️ 终端会卡住不退出——这是正常的，MCP 在等待 stdio 连接。按 `Ctrl+C` 停掉。

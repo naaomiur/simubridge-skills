@@ -47,7 +47,7 @@
 
 MATLAB Engine **only supports Python 3.9–3.12**. If your default Python is 3.13+, install a separate 3.11 or 3.12.
 
-> This tutorial uses Python 3.12 installed to `P:\code\Python3.12`. You can also use 3.11 (`C:\Python311`).
+> This tutorial uses Python 3.12 installed to `C:\Python312`. You can also use 3.11 (`C:\Python311`).
 
 ```cmd
 # Check your Python version
@@ -64,17 +64,17 @@ Run `matlabroot` in MATLAB to get the install path, then install with your prepa
 
 ```cmd
 # Install setuptools first
-P:\code\Python3.12\python.exe -m pip install setuptools
+C:\Python312\python.exe -m pip install setuptools
 
 # Navigate to MATLAB engine directory (replace with your path)
 cd "your-MATLAB-path\extern\engines\python"
-P:\code\Python3.12\python.exe setup.py install
+C:\Python312\python.exe setup.py install
 ```
 
 Verify:
 
 ```cmd
-P:\code\Python3.12\python.exe -c "import matlab.engine; print('OK')"
+C:\Python312\python.exe -c "import matlab.engine; print('OK')"
 ```
 
 #### Troubleshooting
@@ -95,13 +95,13 @@ git clone https://github.com/naaomiur/simubridge-skills.git
 cd simubridge-skills
 
 # Install with your prepared Python
-P:\code\Python3.12\python.exe -m pip install -e .
+C:\Python312\python.exe -m pip install -e .
 ```
 
 Verify:
 
 ```cmd
-P:\code\Python3.12\python.exe -m simubridge
+C:\Python312\python.exe -m simubridge
 ```
 
 > ⚠️ The terminal will hang — this is normal, MCP is waiting for stdio. Press `Ctrl+C` to stop.
@@ -114,7 +114,7 @@ Edit `C:\Users\<username>\.claude.json`, add under `"mcpServers"`:
 
 ```json
 "simubridge": {
-  "command": "P:\\code\\Python3.12\\python.exe",
+  "command": "C:\\Python312\\python.exe",
   "args": ["-m", "simubridge"]
 }
 ```
@@ -127,7 +127,7 @@ Full example:
 {
   "mcpServers": {
     "simubridge": {
-      "command": "P:\\code\\Python3.12\\python.exe",
+      "command": "C:\\Python312\\python.exe",
       "args": ["-m", "simubridge"]
     }
   }
