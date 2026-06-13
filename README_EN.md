@@ -43,14 +43,59 @@
 
 ### 1. Install MATLAB Engine for Python
 
+> ⚠️ Required! SimuBridge connects to MATLAB via the `matlab.engine` API.
+
+#### Steps
+
+Run `matlabroot` in MATLAB to get the install path (e.g. `C:\Program Files\MATLAB\R2024a`), then in terminal:
+
 ```cmd
 cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
 python setup.py install
 ```
 
-Verify: `python -c "import matlab.engine; print('OK')"`
+Verify:
 
-> 💡 Permission error? Add `--user`. Python 3.13+? Downgrade to 3.11 or 3.12.
+```cmd
+python -c "import matlab.engine; print('OK')"
+```
+
+#### Troubleshooting
+
+| Error | Cause | Fix |
+|------|------|------|
+| `Install setuptools` / `No module named 'setuptools'` | setuptools missing | `python -m pip install setuptools` |
+| `permission denied` | No admin rights | `python setup.py install --user` |
+| `supports Python version 3.9, 3.10, 3.11, and 3.12, but your version is 3.13` | Python too new, MATLAB Engine supports 3.9–3.12 only | Use Python 3.11/3.12 (see below) |
+
+#### Python 3.13 Users
+
+MATLAB Engine supports Python 3.12 max. If your default Python is 3.13, install and run with a 3.11/3.12 Python instead.
+
+Install Python 3.11 or 3.12 (default path is `C:\Python311` or `C:\Users\<username>\AppData\Local\Programs\Python\Python311`), then:
+
+```cmd
+# Replace the path below with your Python install path
+C:\Python3.11\python.exe -m pip install setuptools
+cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
+C:\Python3.11\python.exe setup.py install
+C:\Python3.11\python.exe -c "import matlab.engine; print('OK')"
+```
+
+Then point the MCP config to this Python:
+
+```json
+{
+  "mcpServers": {
+    "simubridge": {
+      "command": "C:\\Python3.11\\python.exe",
+      "args": ["-m", "simubridge"]
+    }
+  }
+}
+```
+
+If you don't have an older Python, download Python 3.11 from https://www.python.org/downloads/release/python-3119/ and **uncheck** "Add to PATH" during install.
 
 ### 2. Install the MCP Backend
 

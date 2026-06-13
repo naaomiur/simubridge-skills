@@ -45,6 +45,8 @@
 
 > ⚠️ 必须完成！SimuBridge 通过 `matlab.engine` API 连接 MATLAB。
 
+#### 步骤
+
 在 MATLAB 中运行 `matlabroot` 获取安装路径（如 `C:\Program Files\MATLAB\R2024a`），然后在终端中：
 
 ```cmd
@@ -52,9 +54,49 @@ cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
 python setup.py install
 ```
 
-验证：`python -c "import matlab.engine; print('OK')"`
+验证：
 
-> 💡 权限错误加 `--user`；Python 3.13+ 需降级到 3.11 或 3.12。
+```cmd
+python -c "import matlab.engine; print('OK')"
+```
+
+#### 常见问题排查
+
+| 错误信息 | 原因 | 解决方法 |
+|------|------|------|
+| `Install setuptools` / `ModuleNotFoundError: No module named 'setuptools'` | 缺少 setuptools | `python -m pip install setuptools` |
+| `permission denied` / 权限不足 | 没有管理员权限 | `python setup.py install --user` |
+| `supports Python version 3.9, 3.10, 3.11, and 3.12, but your version is 3.13` | Python 版本太高，MATLAB 引擎只支持 3.9–3.12 | 使用 Python 3.11/3.12 运行安装（见下方） |
+| `'matlab' is not a package` | 当前目录有同名 matlab 文件夹冲突 | 换个目录运行验证命令 |
+
+#### Python 3.13 用户的解决方案
+
+MATLAB 引擎目前最高支持 Python 3.12。如果你的默认 Python 是 3.13，需要用一个 3.11/3.12 的 Python 来安装和运行。
+
+安装 Python 3.11 或 3.12，记住安装路径（默认 `C:\Python311` 或 `C:\Users\你的用户名\AppData\Local\Programs\Python\Python311`），然后：
+
+```cmd
+# 找到你的 Python 安装路径，替换下面的 C:\Python311
+C:\Python3.11\python.exe -m pip install setuptools
+cd "C:\Program Files\MATLAB\R2024a\extern\engines\python"
+C:\Python3.11\python.exe setup.py install
+C:\Python3.11\python.exe -c "import matlab.engine; print('OK')"
+```
+
+安装成功后，MCP 配置也要指向这个 Python：
+
+```json
+{
+  "mcpServers": {
+    "simubridge": {
+      "command": "C:\\Python3.11\\python.exe",（你的python路径）
+      "args": ["-m", "simubridge"]
+    }
+  }
+}
+```
+
+如果没有旧版 Python，去 https://www.python.org/downloads/release/python-3119/ 下载安装 Python 3.11，取消勾选 "Add to PATH"。
 
 ### 2. 安装 MCP 后端
 
